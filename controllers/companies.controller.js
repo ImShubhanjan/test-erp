@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
     // for(const model of existingModels) {
     //   await getData(model);
     // }
-    await millsController.create(req, res);
+    // await millsController.create(req, res);
   } catch (error) {
     console.error("Error creating company:", error);
     res.status(500).json({ error: "Internal Server Error" });

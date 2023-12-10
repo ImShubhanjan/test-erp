@@ -4,35 +4,98 @@ const router = express.Router();
 
 const Mills = require("../models/mills.model.js");
 
+const sMills = require('../swaggerSchema.js')
+const connectDatabase = require("../connection.js");
+console.log(sMills);
 
+/**
+ * @swagger
+ * /api/mills/{companyName}:
+ *   get:
+ *     summary: Get mills for a specific company.
+ *     parameters:
+ *       - in: path
+ *         name: companyName
+ *         required: true
+ *         description: The name of the company.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ *       500:
+ *         description: Internal Server Error
+ */
 router.get('/:companyName', async (req, res) => {
     try {
         const { companyName } = req.params;
         console.log(companyName);
-        const connection = await mongoose.connect(`mongodb+srv://pixdeep:pixdeep123@cluster0.y2cq1.mongodb.net/${companyName}?retryWrites=true&w=majority`);
-
-        const db = await mongoose.connection.useDb(companyName);
-        console.log(db);
-        const mills = await Mills.find();
+        const conn = await connectDatabase(companyName);
+        const millsModel = conn.model('Mills', Mills.schema);
+        // console.log(db);
+        const mills = await millsModel.find();
         res.send(`mills from ${companyName}` + mills);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
-    }
+    } 
 });
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Mill:
+ *        properties:              
+ *             millName:
+ *                  type: string
+ *             millAddress:
+ *                  type: string
+ *             millGSTIN:
+ *                  type: string
+ *             millPhoneNumber:
+ *                  type: string
+ */
+/**
+ * @swagger
+ * /api/mills/{companyName}:
+ *   post:
+ *     summary: Create a new mill for a specific company.
+ *     parameters:
+ *       - in: path
+ *         name: companyName
+ *         required: true
+ *         description: The name of the company.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Mill data to be created
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Mill'
+ *     responses:
+ *       201:
+ *         description: Mill created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Mill'
+ *       500:
+ *         description: Internal Server Error
+ */
 router.post('/:companyName', async (req, res) => {
     try {
         const { companyName } = req.params;
         console.log(companyName);
-        const connection = await mongoose.connect(`mongodb+srv://pixdeep:pixdeep123@cluster0.y2cq1.mongodb.net/${companyName}?retryWrites=true&w=majority`);
-        const db = await mongoose.connection.useDb(companyName);
-        console.log(db);
-        const newMill = await Mills.create(req.body);
+        const conn = await connectDatabase(companyName);
+        const millsModel = conn.model('Mills', Mills.schema); 
+        const newMill = await millsModel.create(req.body);
         res.status(201).send(newMill);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
-    }
+    } 
 });
 // function formatDate(date) {
 //   const options = {
