@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
     const { companyId, companyName, gstin, email } = req.body;
 
     const uri = `mongodb+srv://pixdeep:pixdeep123@cluster0.y2cq1.mongodb.net/${companyName}?retryWrites=true&w=majority`
-    await mongoose.createConnection(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    const connection = await mongoose.createConnection(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     // const sampleCollection = mongoose.conn.collection('sample');
     // await sampleCollection.insertOne({ key: 'value' });
     // const newCompany = await companiesModel.create(req.body);
@@ -48,6 +48,8 @@ router.post("/", async (req, res) => {
     // await sampleCollection.insertOne({ key: 'value' });
     // const companiesModel = mongoose.connection.model('Companies', Companies.schema)
     // const newCompany = await companiesModel.create(req.body);
+    const sampleCollection = connection.collection('sample');
+    await sampleCollection.insertOne({ key: 'value' });
     console.log(`Created DB with ${companyName}`);
     saveToCompany({ companyId, companyName, gstin, email });
     res.send(`Created DB with ${companyName}`);
