@@ -44,7 +44,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // app.use('/api/orders', OrdersRoutes);
 app.use('/api/mills', MillsRoutes);
-// app.use('/api/brokers', BrokersRoutes);
+app.use('/api/brokers', BrokersRoutes);
 app.use('/api/companies', CompaniesRoutes);
 
 app.get('/', (req, res) => {
@@ -52,6 +52,3 @@ app.get('/', (req, res) => {
 })
 
 app.listen(8989, () => console.log("Server started on port 8989"));
-
-
-console.log(swaggerSchema);

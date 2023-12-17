@@ -6,7 +6,7 @@ const Mills = require("../models/mills.model.js");
 
 const sMills = require('../swaggerSchema.js')
 const connectDatabase = require("../connection.js");
-console.log(sMills);
+// console.log(sMills);
 
 /**
  * @swagger
@@ -31,14 +31,18 @@ router.get('/:companyName', async (req, res) => {
         const { companyName } = req.params;
         console.log(companyName);
         const conn = await connectDatabase(companyName);
-        const millsModel = conn.model('Mills', Mills.schema);
-        // console.log(db);
-        const mills = await millsModel.find();
-        res.send(`mills from ${companyName}` + mills);
+        if (conn !== null) {
+            const millsModel = conn.model('Mills', Mills.schema);
+            console.log(millsModel);
+            const mills = await millsModel.find();
+            res.send(`mills from ${companyName}` + mills);
+        } else {
+            res.send('Company does not exist');
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    } 
+        res.status(500).json({ error: 'Internal Server Error' + Mills });
+    }
 });
 /**
  * @swagger
@@ -55,6 +59,7 @@ router.get('/:companyName', async (req, res) => {
  *             millPhoneNumber:
  *                  type: string
  */
+
 /**
  * @swagger
  * /api/mills/{companyName}:
@@ -75,7 +80,7 @@ router.get('/:companyName', async (req, res) => {
  *           schema:
  *             $ref: '#/components/schemas/Mill'
  *     responses:
- *       201:
+ *       200:
  *         description: Mill created successfully
  *         content:
  *           application/json:
@@ -89,13 +94,39 @@ router.post('/:companyName', async (req, res) => {
         const { companyName } = req.params;
         console.log(companyName);
         const conn = await connectDatabase(companyName);
-        const millsModel = conn.model('Mills', Mills.schema); 
+        const millsModel = conn.model('Mills', Mills.schema);
         const newMill = await millsModel.create(req.body);
         res.status(201).send(newMill);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
-    } 
+    }
+});
+//-----------------API to update the existing Broker details -----------------------
+router.put("/:companyName/:id", async (request, response) => {
+    const { companyName, id } = request.params;
+    try {
+
+        const updateDate = new Date();
+        // const formattedmillDate = formatDate(updateDate);
+        // const updateBody = {
+        //     ...request.body,
+        //     millUpdatedDate: formattedmillDate,
+        // };
+        const conn = await connectDatabase(companyName);
+        const millsModel = conn.model('Mills', Mills.schema);
+        // console.log(updateBody);
+        const updateMill = await millsModel.findByIdAndUpdate(
+            id,
+            request.body,
+            { new: true }
+        );
+        if (!updateMill)
+            return response.status(404).json({ error: "Mill not found" });
+        response.json(updateMill);
+    } catch (error) {
+        response.status(500).json({ error: "Error Updating Mill details" });
+    }
 });
 // function formatDate(date) {
 //   const options = {
@@ -162,28 +193,7 @@ router.get('/:companyName', async (req, res) => {
 //   }
 // });
 
-// //-----------------API to update the existing Broker details -----------------------
-// router.put("/:id", async (request, response) => {
-//   try {
-//     const updateDate = new Date();
-//     const formattedmillDate = formatDate(updateDate);
-//     const updateBody = {
-//       ...request.body,
-//       millUpdatedDate: formattedmillDate,
-//     };
-//     console.log(updateBody);
-//     const updateMill = await Mills.findByIdAndUpdate(
-//       request.params.id,
-//       updateBody,
-//       { new: true }
-//     );
-//     if (!updateMill)
-//       return response.status(404).json({ error: "Mill not found" });
-//     response.json(updateMill);
-//   } catch (error) {
-//     response.status(500).json({ error: "Error Updating Mill details" });
-//   }
-// });
+
 
 // //--------------API to delete the mill based on Object id ------------------------
 // router.delete("/:id", async (request, response) => {

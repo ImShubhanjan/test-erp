@@ -1,0 +1,31 @@
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Mill:
+ *        properties:              
+ *             millName:
+ *                  type: string
+ *             millAddress:
+ *                  type: string
+ *             millGSTIN:
+ *                  type: string
+ *             millPhoneNumber:
+ *                  type: string
+ */
+
+ /**
+ * @swagger
+ * components:
+ *    schemas:
+ *      Broker:
+ *         properties:
+                brokerId:
+                    type: string
+                brokerName
+                    type: string
+
+/**
+
+
+

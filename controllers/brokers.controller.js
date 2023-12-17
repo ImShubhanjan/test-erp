@@ -1,18 +1,30 @@
-// const express = require('express')
-// const router = express.Router()
+const express = require('express')
+const router = express.Router()
 
-// const Brokers = require('../models/brokers.model.js');
+const Brokers = require('../models/brokers.model.js');
+const connectDatabase = require('../connection.js');
+const makeSchemaForCompany = require('../makeSchemaForCompany.js')
+const brokersModel = require('../models/brokers.model.js');
 
-// //-----------API to fetch all broker details--------------------
-// router.get('/', (request, response) => {
-//     Brokers.find()
-//         .then(data => {
-//             response.send(data)
-//         })
-//         .catch(error => {
-//             console.log(error)
-//         });
-// });
+//-----------API to fetch all broker details--------------------
+router.get('/:companyName', async (request, response) => {
+    const { companyName } = request.params;
+    try {
+        console.log(companyName);
+        const conn = await connectDatabase(companyName);
+        const brokerModel = conn.model('Brokers', Brokers.schema);
+        brokerModel.find()
+            .then(data => {
+                response.send(`brokers from ${companyName}` + data)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    } catch (err) {
+        console.log(companyName);
+        response.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 // //------------API to fetch single broker based on Object Id---------------------
 // router.get('/:id', async (request, response) => {
@@ -26,25 +38,25 @@
 //     }
 // });
 
-// //------------API to create an broker according to models----------------------
-// router.post('/', async (request, response) => {
-//     const { brokerPhoneNumber } = request.body;
-//     try {
-//         //-----------Validating whether Broker already exists or not-------------------
-//         const existingBroker = await Brokers.findOne({ brokerPhoneNumber });
-//         if (existingBroker)
-//             return response.status(400).json({ message: "Broker already exists" });
-//         const brokerId = Brokers.generateBrokerId(request.body.brokerName, request.body.brokerLocation, request.body.brokerPhoneNumber);
-//         console.log(brokerId);
-//         const newBroker = await Brokers.create({
-//             brokerId,
-//             ...request.body,
-//         });
-//         response.status(201).send(newBroker);
-//     } catch (error) {
-//         response.status(500).json({ error: "Error Creating Broker" })
-//     }
-// });
+//------------API to create an broker according to models----------------------
+router.post('/:companyName', async (request, response) => {
+    const { brokerPhoneNumber } = request.body;
+    const { companyName } = request.params;
+    try {
+        console.log("broker.cont " + companyName);
+        const conn = await connectDatabase(companyName);
+        const brokersModel = conn.model('Brokers', Brokers.schema);
+
+        //-----------Validating whether Broker already exists or not-------------------
+        const existingBroker = await brokersModel.findOne({ brokerPhoneNumber });
+        if (existingBroker)
+            return response.status(400).json({ message: "Broker already exists" });
+        const newBroker = await brokersModel.create(request.body)
+        response.status(201).send(newBroker);
+    } catch (error) {
+        response.status(500).json({ error: "Error Creating Broker" })
+    }
+});
 
 // //-----------------API to update the existing Broker details -----------------------
 // router.put('/:id', async (request, response) => {
@@ -70,4 +82,4 @@
 //     }
 // });
 
-// module.exports = router
+module.exports = router
