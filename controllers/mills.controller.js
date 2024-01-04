@@ -128,6 +128,23 @@ router.put("/:companyName/:id", async (request, response) => {
         response.status(500).json({ error: "Error Updating Mill details" });
     }
 });
+
+//--------------API to delete the mill based on Object id ------------------------
+router.delete("/:companyName/:id", async (request, response) => {
+    try {
+        const { companyName, id } = request.params;
+
+        const conn = await connectDatabase(companyName);
+        const millsModel = conn.model('Mills', Mills.schema);
+
+        const deletedMill = await millsModel.findByIdAndDelete(id);
+        if (!deletedMill)
+            return response.status(404).json({ error: "Mill not found" });
+        response.json({ message: "Mill deleted" + deletedMill });
+    } catch (error) {
+        response.status(500).json({ error: "Error deleting Mill" });
+    }
+});
 // function formatDate(date) {
 //   const options = {
 //     day: "2-digit",
